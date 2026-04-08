@@ -1,0 +1,85 @@
+CREATE TABLE customers (
+    customer_id INT PRIMARY KEY,
+    full_name VARCHAR(255),
+    phone VARCHAR(15),
+    address VARCHAR(255)
+);
+
+CREATE TABLE products (
+    product_id INT PRIMARY KEY,
+    product_name VARCHAR(255),
+    price DECIMAL(10,2)
+);
+INSERT INTO customers VALUES
+(1, 'Nguyen Van Anh', '0123456789', 'Ha Noi'),
+(2, 'Tran Van Bach', '0987654321', 'Hai Phong'),
+(3, 'Le Thi Chi', '0111222333', 'Da Nang'),
+(4, 'Pham Van Dung', '0222333444', 'Ha Noi'),
+(5, 'Hoang Van Em', '0333444555', 'HCM'),
+(6, 'Do Thi Thao', '0444555666', 'Hue'),
+(7, 'Bui Van Giang', '0555666777', 'Nam Dinh'),
+(8, 'Dang Van Hieu', '0666777888', 'Hai Duong'),
+(9, 'Nguyen Thi Van', '0777888999', 'Can Tho'),
+(10, 'Vu Van Khanh', '0888999000', 'Ha Noi');
+
+INSERT INTO products VALUES
+(1, 'Banh mi', 1000000),
+(2, 'Sua tuoi', 150000),
+(3, 'Mi goi', 5000),
+(4, 'Nuoc ngot', 12000),
+(5, 'Tra sua', 30000),
+(6, 'Ca phe', 25000),
+(7, 'Banh ngot', 20000),
+(8, 'Keo', 8000),
+(9, 'Snack', 10000),
+(10, 'Nuoc suoi', 700000),
+(11, 'Sua chua', 6000),
+(12, 'Trung ga', 3000),
+(13, 'Com hop', 3500000),
+(14, 'Xuc xich', 1500000),
+(15, 'Pho goi', 7000),
+(16, 'Bun tuoi', 10000),
+(17, 'Rau sach', 12000),
+(18, 'Thit heo', 9000000),
+(19, 'Ca tuoi', 80000),
+(20, 'Tom', 10000000);
+
+
+#'bài 1'
+SELECT 
+    COUNT(*) AS SoLuongSanPham,
+    AVG(price) AS GiaTrungBinh,
+    MIN(price) AS GiaThapNhat,
+    MAX(price) AS GiaCaoNhat
+FROM products;
+
+#'bài 2'
+SELECT 
+    s.supplier_name,
+    COUNT(p.product_id) AS TongSanPham
+FROM suppliers s
+JOIN products p 
+    ON s.supplier_id = p.supplier_id
+GROUP BY s.supplier_name
+HAVING COUNT(p.product_id) > 1;
+
+#'bài 3'
+SELECT 
+    order_id,
+    TO_CHAR(order_date, 'DD/MM/YYYY') AS NgayDatHang
+FROM orders
+WHERE 
+    EXTRACT(YEAR FROM order_date) = 2025
+    AND EXTRACT(MONTH FROM order_date) = 10;
+#'bài 4'
+SELECT 
+    c.full_name,
+    SUM(oi.quantity * oi.price) AS TongChiTieu
+FROM customers c
+JOIN orders o 
+    ON c.customer_id = o.customer_id
+JOIN order_items oi 
+    ON o.order_id = oi.order_id
+GROUP BY c.full_name
+HAVING SUM(oi.quantity * oi.price) > 100000
+ORDER BY TongChiTieu DESC;
