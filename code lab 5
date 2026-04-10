@@ -1,0 +1,213 @@
+-- Xóa bảng cũ nếu có
+DROP TABLE IF EXISTS order_detail_2;
+DROP TABLE IF EXISTS invoice_2;
+DROP TABLE IF EXISTS product_2;
+DROP TABLE IF EXISTS supplier_2;
+DROP TABLE IF EXISTS customer_2;
+
+-- 1. Customer
+CREATE TABLE customer_2 (
+    customer_id INT PRIMARY KEY,
+    ten_khach_hang VARCHAR(100),
+    so_dien_thoai VARCHAR(15),
+    dia_chi VARCHAR(255)
+);
+
+-- 2. Supplier
+CREATE TABLE supplier_2 (
+    supplier_id INT PRIMARY KEY,
+    supplier_name VARCHAR(100),
+    so_dien_thoai VARCHAR(15)
+);
+
+-- 3. Product
+CREATE TABLE product_2 (
+    product_id INT PRIMARY KEY,
+    ten_san_pham VARCHAR(100),
+    don_gia DECIMAL(10,2),
+    supplier_id INT,
+    FOREIGN KEY (supplier_id) REFERENCES supplier_2(supplier_id)
+);
+
+-- 4. Invoice
+CREATE TABLE invoice_2 (
+    invoice_id INT PRIMARY KEY,
+    ngay_tao DATE,
+    tong_tien DECIMAL(10,2),
+    customer_id INT,
+    FOREIGN KEY (customer_id) REFERENCES customer_2(customer_id)
+);
+
+-- 5. Order Detail
+CREATE TABLE order_detail_2 (
+    invoice_id INT,
+    product_id INT,
+    so_luong INT,
+    don_gia DECIMAL(10,2),
+    PRIMARY KEY (invoice_id, product_id),
+    FOREIGN KEY (invoice_id) REFERENCES invoice_2(invoice_id),
+    FOREIGN KEY (product_id) REFERENCES product_2(product_id)
+);
+
+
+
+
+-- Customer
+INSERT INTO customer_2 VALUES
+(1, 'Nguyễn Văn A', '0901111111', 'Hà Nội'),
+(2, 'Trần Thị B', '0902222222', 'Hải Phòng'),
+(3, 'Lê Văn C', '0903333333', 'Đà Nẵng'),
+(4, 'Phạm Thị D', '0904444444', 'Hà Nội'),
+(5, 'Hoàng Văn E', '0905555555', 'TP.HCM'),
+(6, 'Đỗ Thị F', '0906666666', 'Cần Thơ'),
+(7, 'Bùi Văn G', '0907777777', 'Huế'),
+(8, 'Ngô Thị H', '0908888888', 'Nha Trang'),
+(9, 'Vũ Văn I', '0909999999', 'Quảng Ninh'),
+(10, 'Đặng Thị K', '0910000000', 'Bắc Ninh');
+
+-- Supplier
+INSERT INTO supplier_2 VALUES
+(1, 'Vinamilk', '0901234567'),
+(2, 'Coca Cola VN', '0902345678'),
+(3, 'Acecook', '0903456789'),
+(4, 'TH True Milk', '0904567890'),
+(5, 'PepsiCo', '0905678901');
+
+-- Product
+INSERT INTO product_2 VALUES
+(1, 'Sữa Vinamilk', 30000, 1),
+(2, 'Bánh Oreo', 20000, 5),
+(3, 'Nước Coca', 15000, 2),
+(4, 'Mì Hảo Hảo', 5000, 3),
+(5, 'Trà Lipton', 25000, 5),
+(6, 'Cà phê G7', 35000, 5),
+(7, 'Bánh mì Sandwich', 18000, 5),
+(8, 'Nước suối Lavie', 10000, 2),
+(9, 'Sữa chua TH', 12000, 4),
+(10, 'Snack khoai tây', 22000, 5);
+
+-- Invoice
+INSERT INTO invoice_2 VALUES
+(101, '2024-03-01', 0, 1),
+(102, '2024-03-02', 0, 2),
+(103, '2024-03-03', 0, 3),
+(104, '2024-03-04', 0, 1),
+(105, '2024-03-05', 0, 5),
+(106, '2024-03-06', 0, 6),
+(107, '2024-03-07', 0, 8),
+(108, '2024-03-08', 0, 2),
+(303, '2025-10-10', 0, 1),
+(304, '2025-10-15', 0, 2),
+(305, '2025-10-20', 0, 3),
+(306, '2025-10-25', 0, 4);
+
+-- Order Detail
+INSERT INTO order_detail_2 VALUES
+(101, 1, 2, 30000),
+(101, 2, 1, 20000),
+(101, 4, 5, 5000),
+
+(102, 3, 3, 15000),
+(102, 5, 2, 25000),
+
+(103, 6, 1, 35000),
+(103, 7, 2, 18000),
+
+(104, 1, 1, 30000),
+(104, 8, 4, 10000),
+
+(105, 9, 3, 12000),
+(105, 10, 2, 22000),
+
+(106, 2, 2, 20000),
+(106, 3, 1, 15000),
+
+(107, 4, 10, 5000),
+(107, 5, 1, 25000),
+
+(108, 6, 2, 35000),
+(108, 7, 1, 18000);
+
+
+
+
+
+select
+    od.invoice_id,
+    p.ten_san_pham,
+    od.so_luong,
+    od.don_gia
+from order_detail_2 od
+inner join product_2 p 
+    on od.product_id = p.product_id;
+
+
+select
+    c.ten_khach_hang,
+    i.invoice_id
+from customer_2 c
+left join invoice_2 i 
+    on c.customer_id = i.customer_id;
+	
+select 
+    p.ten_san_pham,
+    od.invoice_id
+from order_detail_2 od
+right join product_2 p
+    on od.product_id = p.product_id;
+
+select 
+    ten_khach_hang as ContactName,
+    so_dien_thoai as PhoneNumber
+from customer_2
+
+union
+
+select
+    supplier_name,
+    so_dien_thoai
+from supplier_2;
+
+
+select 
+    ten_san_pham,
+    don_gia
+from product_2
+where supplier_id in (
+   select supplier_id
+    from supplier_2
+   where supplier_name = 'Vinamilk'
+);
+
+
+select
+    ten_san_pham,
+    don_gia,
+    (select avg (don_gia)from product_2) as gia_trung_binh
+from product_2;
+
+
+
+
+select *
+from (
+   select
+        invoice_id,
+       sum(so_luong * don_gia) as tong_tien
+    from order_detail_2
+    group by invoice_id
+) as temp
+where  tong_tien > 50000;
+
+
+
+
+
+
+select supplier_name
+from supplier_2 s
+where exists (
+    select 1
+    from product_2 p
+    where p.supplier_id = s.supplier_id
+);
